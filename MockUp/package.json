@@ -4,11 +4,9 @@
   "description": "AvenStudio Desktop Prototype - Self-Build Navigator",
   "main": "electron/main.js",
   "scripts": {
-    "dev": "vite",
-    "build": "tsc && vite build",
-    "preview": "vite preview",
-    "electron:dev": "concurrently \"npm run dev\" \"wait-on http://localhost:5173 && electron .\"",
-    "electron:build": "npm run build && electron-builder"
+    "start": "electron .",
+    "electron:dev": "electron .",
+    "electron:build": "electron-builder"
   },
   "author": "AvenStudio",
   "license": "MIT",
@@ -36,7 +34,7 @@
       "output": "dist-electron"
     },
     "files": [
-      "dist/**/*",
+      "ui/**/*",
       "electron/**/*",
       "backend/**/*",
       "data/**/*"
