@@ -8,8 +8,14 @@ class AvenStudioAPI {
     this.isElectron = typeof window !== 'undefined' &&
                       typeof window.api !== 'undefined';
 
+    console.log('🔌 AvenStudio API initializing...');
+    console.log('  - window.api available:', typeof window.api !== 'undefined');
+    console.log('  - Mode:', this.isElectron ? 'Electron (using Python backend)' : 'Browser (using localStorage)');
+
     if (!this.isElectron) {
       console.warn('⚠️ Running in browser mode - using localStorage fallback');
+    } else {
+      console.log('✅ Connected to Electron IPC bridge');
     }
   }
 

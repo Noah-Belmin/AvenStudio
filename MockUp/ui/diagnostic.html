@@ -1,0 +1,165 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AvenStudio - Diagnostic Test</title>
+    <style>
+        body {
+            font-family: system-ui, sans-serif;
+            padding: 2rem;
+            background: #f5f5f5;
+        }
+        .test-item {
+            background: white;
+            padding: 1rem;
+            margin: 0.5rem 0;
+            border-radius: 4px;
+            border-left: 4px solid #ccc;
+        }
+        .test-item.pass {
+            border-left-color: #4a7c59;
+            background: #e8f0ea;
+        }
+        .test-item.fail {
+            border-left-color: #9e3b3b;
+            background: #fae8e8;
+        }
+        code {
+            background: #f0f0f0;
+            padding: 0.2rem 0.4rem;
+            border-radius: 3px;
+            font-family: monospace;
+        }
+    </style>
+</head>
+<body>
+    <h1>🔍 AvenStudio Diagnostic Test</h1>
+    <p>This page tests if all components are loading correctly in Electron.</p>
+
+    <div id="tests"></div>
+
+    <script>
+        const tests = [];
+
+        function addTest(name, passed, details) {
+            tests.push({ name, passed, details });
+            renderTests();
+        }
+
+        function renderTests() {
+            const container = document.getElementById('tests');
+            container.innerHTML = tests.map(test => `
+                <div class="test-item ${test.passed ? 'pass' : 'fail'}">
+                    <strong>${test.passed ? '✅' : '❌'} ${test.name}</strong><br>
+                    <small>${test.details}</small>
+                </div>
+            `).join('');
+        }
+
+        // Test 1: Check if we're in Electron
+        addTest(
+            'Electron Environment',
+            typeof window.api !== 'undefined',
+            typeof window.api !== 'undefined'
+                ? 'Running in Electron with IPC bridge'
+                : 'Not in Electron (window.api is undefined)'
+        );
+
+        // Test 2: Check Electron API methods
+        if (typeof window.api !== 'undefined') {
+            const hasTasksAPI = typeof window.api.tasks !== 'undefined';
+            const hasStatsAPI = typeof window.api.stats !== 'undefined';
+            addTest(
+                'Electron API Methods',
+                hasTasksAPI && hasStatsAPI,
+                `tasks: ${hasTasksAPI ? '✓' : '✗'}, stats: ${hasStatsAPI ? '✓' : '✗'}`
+            );
+        }
+
+        // Test 3: Try to load api.js
+        const apiScript = document.createElement('script');
+        apiScript.src = 'scripts/api.js';
+        apiScript.onload = () => {
+            addTest(
+                'Load scripts/api.js',
+                true,
+                'Script loaded successfully'
+            );
+
+            // Test 4: Check if AvenStudio API was created
+            setTimeout(() => {
+                addTest(
+                    'window.avenAPI created',
+                    typeof window.avenAPI !== 'undefined',
+                    typeof window.avenAPI !== 'undefined'
+                        ? 'API wrapper initialized'
+                        : 'window.avenAPI is undefined - check api.js'
+                );
+
+                // Test 5: Try to fetch data
+                if (typeof window.avenAPI !== 'undefined') {
+                    window.avenAPI.getStats()
+                        .then(stats => {
+                            addTest(
+                                'Fetch Stats Data',
+                                true,
+                                `Loaded: ${stats.total_tasks} total tasks`
+                            );
+                        })
+                        .catch(error => {
+                            addTest(
+                                'Fetch Stats Data',
+                                false,
+                                `Error: ${error.message}`
+                            );
+                        });
+
+                    window.avenAPI.getTasks()
+                        .then(tasks => {
+                            addTest(
+                                'Fetch Tasks Data',
+                                true,
+                                `Loaded: ${tasks.length} tasks`
+                            );
+                        })
+                        .catch(error => {
+                            addTest(
+                                'Fetch Tasks Data',
+                                false,
+                                `Error: ${error.message}`
+                            );
+                        });
+                }
+            }, 100);
+        };
+        apiScript.onerror = () => {
+            addTest(
+                'Load scripts/api.js',
+                false,
+                'Failed to load script - check path'
+            );
+        };
+        document.head.appendChild(apiScript);
+
+        // Test 6: Check Python backend
+        fetch('http://127.0.0.1:8000/docs')
+            .then(response => {
+                addTest(
+                    'Python Backend',
+                    response.ok,
+                    response.ok
+                        ? 'Backend running at http://127.0.0.1:8000'
+                        : `HTTP ${response.status}`
+                );
+            })
+            .catch(error => {
+                addTest(
+                    'Python Backend',
+                    false,
+                    `Cannot connect: ${error.message} - Is Python running?`
+                );
+            });
+    </script>
+</body>
+</html>
