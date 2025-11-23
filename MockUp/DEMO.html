@@ -1,0 +1,203 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AvenStudio - Vanilla JS Demo</title>
+
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500&display=swap" rel="stylesheet">
+
+    <!-- Styles -->
+    <link rel="stylesheet" href="ui/styles/tokens.css">
+    <link rel="stylesheet" href="ui/styles/components.css">
+
+    <style>
+        .demo-banner {
+            background: linear-gradient(135deg, var(--navy) 0%, var(--bronze) 100%);
+            color: white;
+            padding: 1rem 2rem;
+            text-align: center;
+            font-size: 0.875rem;
+        }
+        .demo-banner strong {
+            font-weight: 500;
+        }
+    </style>
+</head>
+<body>
+    <div class="demo-banner">
+        <strong>🎨 Vanilla JavaScript Demo</strong> - Same Navy/Bronze/Mint design, real data loading, no React framework
+    </div>
+
+    <div class="app-layout">
+        <!-- Sidebar -->
+        <aside class="sidebar" id="sidebar">
+            <div class="sidebar-header">
+                <div class="logo">AvenStudio</div>
+                <div class="logo-subtitle">Self-Build Navigator</div>
+            </div>
+
+            <nav class="sidebar-nav">
+                <div class="nav-section">
+                    <a href="#" class="nav-item active">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+                            <rect x="3" y="3" width="7" height="7" rx="1"/>
+                            <rect x="14" y="3" width="7" height="7" rx="1"/>
+                            <rect x="3" y="14" width="7" height="7" rx="1"/>
+                            <rect x="14" y="14" width="7" height="7" rx="1"/>
+                        </svg>
+                        <span>Dashboard</span>
+                    </a>
+                </div>
+            </nav>
+
+            <div class="sidebar-footer">
+                <div class="sidebar-stats">
+                    <div class="sidebar-stat">
+                        <span class="sidebar-stat-label">Total Tasks</span>
+                        <span class="sidebar-stat-value" id="sidebar-total">—</span>
+                    </div>
+                    <div class="sidebar-stat">
+                        <span class="sidebar-stat-label">In Progress</span>
+                        <span class="sidebar-stat-value" id="sidebar-inprogress">—</span>
+                    </div>
+                    <div class="sidebar-stat">
+                        <span class="sidebar-stat-label">Completed</span>
+                        <span class="sidebar-stat-value" id="sidebar-completed">—</span>
+                    </div>
+                </div>
+            </div>
+        </aside>
+
+        <!-- Main Content -->
+        <main class="main-content">
+            <!-- Top Bar -->
+            <header class="top-bar">
+                <div class="top-bar-left">
+                    <h1 class="page-title">Dashboard</h1>
+                </div>
+
+                <div class="search-bar">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <circle cx="11" cy="11" r="8"/>
+                        <path d="M21 21l-4.35-4.35"/>
+                    </svg>
+                    <input type="text" placeholder="Search tasks...">
+                    <span class="search-shortcut">⌘K</span>
+                </div>
+
+                <div class="top-bar-right">
+                    <button class="btn-primary" onclick="alert('New Task modal would open')">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <path d="M12 5v14M5 12h14"/>
+                        </svg>
+                        New Task
+                    </button>
+                </div>
+            </header>
+
+            <!-- Dashboard Content -->
+            <div class="dashboard">
+                <!-- Stats Cards -->
+                <div class="stats-grid">
+                    <div class="stat-card">
+                        <div class="stat-card-header">
+                            <span class="stat-card-title">Total Tasks</span>
+                            <div class="stat-card-icon navy">
+                                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+                                    <path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5"/>
+                                </svg>
+                            </div>
+                        </div>
+                        <div class="stat-card-value" id="stat-total">—</div>
+                        <div class="stat-card-label">Across all phases</div>
+                    </div>
+
+                    <div class="stat-card">
+                        <div class="stat-card-header">
+                            <span class="stat-card-title">In Progress</span>
+                            <div class="stat-card-icon mint">
+                                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+                                    <circle cx="12" cy="12" r="10"/>
+                                    <path d="M12 6v6l4 2"/>
+                                </svg>
+                            </div>
+                        </div>
+                        <div class="stat-card-value" id="stat-inprogress">—</div>
+                        <div class="stat-card-label">Currently active</div>
+                    </div>
+
+                    <div class="stat-card">
+                        <div class="stat-card-header">
+                            <span class="stat-card-title">Completed</span>
+                            <div class="stat-card-icon success">
+                                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+                                    <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/>
+                                    <path d="M22 4L12 14.01l-3-3"/>
+                                </svg>
+                            </div>
+                        </div>
+                        <div class="stat-card-value" id="stat-completed">—</div>
+                        <div class="stat-card-label" id="stat-completion-rate">—% completion rate</div>
+                    </div>
+
+                    <div class="stat-card">
+                        <div class="stat-card-header">
+                            <span class="stat-card-title">Blocked</span>
+                            <div class="stat-card-icon danger">
+                                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+                                    <circle cx="12" cy="12" r="10"/>
+                                    <path d="M12 8v4M12 16h.01"/>
+                                </svg>
+                            </div>
+                        </div>
+                        <div class="stat-card-value" id="stat-blocked">—</div>
+                        <div class="stat-card-label">Needs attention</div>
+                    </div>
+                </div>
+
+                <!-- Progress Section -->
+                <div class="section">
+                    <h2 class="section-title">Overall Progress</h2>
+                    <p class="section-subtitle" id="progress-subtitle">Loading progress...</p>
+                    <div class="progress-bar-container">
+                        <div class="progress-bar" id="progressBar" style="width: 0%"></div>
+                    </div>
+                </div>
+
+                <!-- Two Column Layout -->
+                <div class="two-column">
+                    <!-- High Priority Tasks -->
+                    <div class="section">
+                        <div class="task-section-header">
+                            <h2 class="section-title">High Priority Tasks</h2>
+                            <p class="task-count" id="high-priority-count">Loading...</p>
+                        </div>
+                        <div class="task-list" id="highPriorityTasks">
+                            <!-- Populated by JavaScript -->
+                        </div>
+                    </div>
+
+                    <!-- Upcoming Due Dates -->
+                    <div class="section">
+                        <div class="task-section-header">
+                            <h2 class="section-title">Upcoming Due Dates</h2>
+                            <p class="task-count" id="upcoming-count">Loading...</p>
+                        </div>
+                        <div class="task-list" id="upcomingTasks">
+                            <!-- Populated by JavaScript -->
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <!-- Scripts -->
+    <script src="ui/scripts/api.js"></script>
+    <script src="ui/scripts/dashboard.js"></script>
+</body>
+</html>
