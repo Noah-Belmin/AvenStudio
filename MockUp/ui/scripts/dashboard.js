@@ -13,6 +13,23 @@ let stats = null;
 document.addEventListener('DOMContentLoaded', async () => {
   console.log('🏗️ AvenStudio Dashboard initializing...');
 
+  // Check if API is available
+  if (typeof window.avenAPI === 'undefined') {
+    console.error('❌ window.avenAPI is not defined! Check if api.js loaded correctly.');
+    showError('API not loaded. Please refresh the page.');
+    return;
+  }
+
+  // Check if we're in Electron
+  const isElectron = typeof window.api !== 'undefined';
+  console.log('📱 Running in:', isElectron ? 'Electron' : 'Browser');
+
+  if (isElectron) {
+    console.log('✅ window.api available from Electron preload');
+  } else {
+    console.log('⚠️ Using localStorage fallback (browser mode)');
+  }
+
   // Load all data
   await loadDashboardData();
 
@@ -26,6 +43,8 @@ document.addEventListener('DOMContentLoaded', async () => {
 
 async function loadDashboardData() {
   try {
+    console.log('📡 Fetching stats and tasks...');
+
     // Load stats and tasks in parallel
     const [statsData, tasksData] = await Promise.all([
       window.avenAPI.getStats(),
@@ -35,7 +54,9 @@ async function loadDashboardData() {
     stats = statsData;
     allTasks = tasksData;
 
-    console.log('📊 Loaded:', { stats, tasks: allTasks.length });
+    console.log('📊 Loaded successfully!');
+    console.log('  - Stats:', stats);
+    console.log('  - Tasks:', allTasks.length, 'tasks');
 
     // Update UI
     updateStatsCards();
@@ -46,7 +67,8 @@ async function loadDashboardData() {
 
   } catch (error) {
     console.error('❌ Failed to load dashboard data:', error);
-    showError('Failed to load data. Please refresh the page.');
+    console.error('Error details:', error.message, error.stack);
+    showError(`Failed to load data: ${error.message}`);
   }
 }
 
@@ -256,8 +278,27 @@ function escapeHtml(text) {
 }
 
 function showError(message) {
-  alert(`Error: ${message}`);
-  // TODO: Implement better error UI
+  // Show error banner at top of page
+  const dashboard = document.querySelector('.dashboard');
+  if (dashboard) {
+    const errorBanner = document.createElement('div');
+    errorBanner.style.cssText = `
+      background: var(--danger-light);
+      border: 2px solid var(--danger);
+      border-radius: var(--radius-md);
+      padding: var(--spacing-lg);
+      margin-bottom: var(--spacing-xl);
+      color: var(--danger);
+    `;
+    errorBanner.innerHTML = `
+      <strong>❌ Error:</strong> ${escapeHtml(message)}<br>
+      <small>Check the DevTools console (F12) for details.</small>
+    `;
+    dashboard.insertBefore(errorBanner, dashboard.firstChild);
+  }
+
+  // Also log to console
+  console.error('Error displayed to user:', message);
 }
 
 // ==================== CSV EXPORT ====================
