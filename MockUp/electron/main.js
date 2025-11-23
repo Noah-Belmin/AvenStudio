@@ -83,19 +83,12 @@ function createWindow() {
     console.log('✅ Application window ready');
   });
 
-  // Load app
-  const isDev = process.env.NODE_ENV === 'development';
+  // Load app - using vanilla JS UI from ui/ folder
+  const uiPath = path.join(__dirname, '../ui/dashboard.html');
 
-  if (isDev) {
-    // Development: Load from Vite dev server
-    mainWindow.loadURL('http://localhost:5173');
-    mainWindow.webContents.openDevTools();
-    console.log('📦 Loaded from Vite dev server (http://localhost:5173)');
-  } else {
-    // Production: Load built files
-    mainWindow.loadFile(path.join(__dirname, '../dist/index.html'));
-    console.log('📦 Loaded from built files');
-  }
+  mainWindow.loadFile(uiPath);
+  mainWindow.webContents.openDevTools(); // Always open DevTools for development
+  console.log('📦 Loaded vanilla JS UI from:', uiPath);
 
   // Handle window close
   mainWindow.on('closed', () => {
