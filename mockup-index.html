@@ -1,0 +1,405 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AvenStudio — Mockup Gallery</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --navy: #304F5D;
+            --navy-dark: #243a45;
+            --navy-light: #3d6275;
+            --bronze: #A57F62;
+            --bronze-light: #c9a485;
+            --mint: #98D0D3;
+            --mint-light: #c5e5e7;
+            --sand: #EEE5DC;
+            --sand-light: #F7F4F0;
+            --sand-dark: #e0d4c8;
+            --white: #FFFFFF;
+            --success: #4a7c59;
+
+            --font-display: 'DM Sans', -apple-system, sans-serif;
+            --font-body: 'DM Sans', -apple-system, sans-serif;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: var(--font-body);
+            background: linear-gradient(135deg, var(--sand-light) 0%, var(--white) 100%);
+            color: var(--navy);
+            line-height: 1.6;
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 2rem;
+        }
+
+        .container {
+            max-width: 1200px;
+            width: 100%;
+        }
+
+        header {
+            text-align: center;
+            margin-bottom: 3rem;
+        }
+
+        .logo {
+            font-size: 3rem;
+            font-weight: 500;
+            color: var(--navy);
+            margin-bottom: 0.5rem;
+        }
+
+        .tagline {
+            font-size: 1.125rem;
+            color: var(--navy);
+            opacity: 0.6;
+            margin-bottom: 1rem;
+        }
+
+        .description {
+            font-size: 0.9375rem;
+            color: var(--navy);
+            opacity: 0.7;
+            max-width: 600px;
+            margin: 0 auto 2rem;
+        }
+
+        .status-badge {
+            display: inline-block;
+            padding: 0.5rem 1rem;
+            background: var(--mint-light);
+            color: var(--navy);
+            border-radius: 6px;
+            font-size: 0.875rem;
+            font-weight: 500;
+        }
+
+        .mockup-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(400px, 1fr));
+            gap: 2rem;
+            margin-bottom: 3rem;
+        }
+
+        @media (max-width: 768px) {
+            .mockup-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        .mockup-card {
+            background: var(--white);
+            border-radius: 12px;
+            padding: 2rem;
+            border: 1px solid var(--sand-dark);
+            transition: all 0.3s ease;
+            text-decoration: none;
+            display: block;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .mockup-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 4px;
+            background: linear-gradient(90deg, var(--navy) 0%, var(--bronze) 100%);
+            transform: scaleX(0);
+            transform-origin: left;
+            transition: transform 0.3s ease;
+        }
+
+        .mockup-card:hover {
+            border-color: var(--bronze-light);
+            box-shadow: 0 8px 24px rgba(48, 79, 93, 0.12);
+            transform: translateY(-4px);
+        }
+
+        .mockup-card:hover::before {
+            transform: scaleX(1);
+        }
+
+        .mockup-header {
+            display: flex;
+            align-items: flex-start;
+            justify-content: space-between;
+            margin-bottom: 1rem;
+        }
+
+        .mockup-icon {
+            width: 48px;
+            height: 48px;
+            background: var(--sand);
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            flex-shrink: 0;
+        }
+
+        .mockup-icon svg {
+            width: 24px;
+            height: 24px;
+            color: var(--navy);
+        }
+
+        .mockup-title {
+            font-family: var(--font-display);
+            font-size: 1.5rem;
+            font-weight: 500;
+            color: var(--navy);
+            margin-bottom: 0.75rem;
+        }
+
+        .mockup-description {
+            font-size: 0.9375rem;
+            color: var(--navy);
+            opacity: 0.7;
+            margin-bottom: 1.5rem;
+        }
+
+        .mockup-features {
+            list-style: none;
+            margin-bottom: 1.5rem;
+        }
+
+        .mockup-features li {
+            font-size: 0.875rem;
+            color: var(--navy);
+            opacity: 0.6;
+            padding-left: 1.5rem;
+            position: relative;
+            margin-bottom: 0.5rem;
+        }
+
+        .mockup-features li::before {
+            content: '✓';
+            position: absolute;
+            left: 0;
+            color: var(--success);
+            font-weight: 600;
+        }
+
+        .btn-view {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            padding: 0.75rem 1.25rem;
+            background: var(--navy);
+            color: var(--white);
+            border-radius: 6px;
+            font-size: 0.875rem;
+            font-weight: 500;
+            text-decoration: none;
+            transition: all 0.2s ease;
+        }
+
+        .btn-view:hover {
+            background: var(--navy-dark);
+        }
+
+        .btn-view svg {
+            width: 16px;
+            height: 16px;
+        }
+
+        .design-info {
+            background: var(--white);
+            border-radius: 12px;
+            padding: 2rem;
+            border: 1px solid var(--sand-dark);
+        }
+
+        .design-info h2 {
+            font-family: var(--font-display);
+            font-size: 1.25rem;
+            font-weight: 500;
+            color: var(--navy);
+            margin-bottom: 1rem;
+        }
+
+        .color-palette {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(100px, 1fr));
+            gap: 1rem;
+            margin-top: 1.5rem;
+        }
+
+        .color-swatch {
+            text-align: center;
+        }
+
+        .color-circle {
+            width: 60px;
+            height: 60px;
+            border-radius: 50%;
+            margin: 0 auto 0.5rem;
+            border: 2px solid var(--sand-dark);
+        }
+
+        .color-name {
+            font-size: 0.75rem;
+            font-weight: 500;
+            color: var(--navy);
+            margin-bottom: 0.25rem;
+        }
+
+        .color-hex {
+            font-size: 0.6875rem;
+            color: var(--navy);
+            opacity: 0.5;
+            font-family: monospace;
+        }
+
+        footer {
+            text-align: center;
+            margin-top: 3rem;
+            padding-top: 2rem;
+            border-top: 1px solid var(--sand);
+        }
+
+        footer p {
+            font-size: 0.875rem;
+            color: var(--navy);
+            opacity: 0.5;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1 class="logo">AvenStudio</h1>
+            <p class="tagline">Self-Build Navigator</p>
+            <p class="description">
+                A thoughtfully designed project management platform for UK self-builders.
+                These mockups demonstrate the calm, professional aesthetic and user-friendly interface.
+            </p>
+            <span class="status-badge">Design Mockups — November 2025</span>
+        </header>
+
+        <div class="mockup-grid">
+            <!-- Dashboard Mockup -->
+            <div class="mockup-card">
+                <div class="mockup-header">
+                    <div class="mockup-icon">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+                            <rect x="3" y="3" width="7" height="7" rx="1"/>
+                            <rect x="14" y="3" width="7" height="7" rx="1"/>
+                            <rect x="3" y="14" width="7" height="7" rx="1"/>
+                            <rect x="14" y="14" width="7" height="7" rx="1"/>
+                        </svg>
+                    </div>
+                </div>
+                <h2 class="mockup-title">Dashboard View</h2>
+                <p class="mockup-description">
+                    Main overview showing project stats, high-priority tasks, and upcoming deadlines at a glance.
+                </p>
+                <ul class="mockup-features">
+                    <li>Stats cards (Total, In Progress, Completed, Blocked)</li>
+                    <li>Overall progress visualization</li>
+                    <li>High priority task list</li>
+                    <li>Upcoming due dates with status indicators</li>
+                    <li>Expandable sidebar navigation</li>
+                    <li>Global search with keyboard shortcut</li>
+                </ul>
+                <a href="selfbuild-dashboard.html" class="btn-view">
+                    View Dashboard
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <path d="M5 12h14M12 5l7 7-7 7"/>
+                    </svg>
+                </a>
+            </div>
+
+            <!-- Timeline Mockup -->
+            <div class="mockup-card">
+                <div class="mockup-header">
+                    <div class="mockup-icon">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+                            <circle cx="12" cy="12" r="10"/>
+                            <path d="M12 6v6l4 2"/>
+                        </svg>
+                    </div>
+                </div>
+                <h2 class="mockup-title">Timeline View</h2>
+                <p class="mockup-description">
+                    Gantt-style timeline showing task schedules, durations, and progress across the project.
+                </p>
+                <ul class="mockup-features">
+                    <li>Gantt chart with horizontal progress bars</li>
+                    <li>Color-coded by status (in-progress, blocked, review, done)</li>
+                    <li>Percentage completion indicators</li>
+                    <li>Collapsed sidebar for maximum timeline visibility</li>
+                    <li>Task status tags and priority levels</li>
+                    <li>Responsive layout (minimum 900px width)</li>
+                </ul>
+                <a href="selfbuild-timeline.html" class="btn-view">
+                    View Timeline
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <path d="M5 12h14M12 5l7 7-7 7"/>
+                    </svg>
+                </a>
+            </div>
+        </div>
+
+        <div class="design-info">
+            <h2>Design System</h2>
+            <p class="mockup-description">
+                AvenStudio uses a restrained, professional color palette inspired by natural materials.
+                Typography is exclusively DM Sans for clean consistency throughout.
+            </p>
+
+            <div class="color-palette">
+                <div class="color-swatch">
+                    <div class="color-circle" style="background-color: #304F5D;"></div>
+                    <div class="color-name">Navy</div>
+                    <div class="color-hex">#304F5D</div>
+                </div>
+                <div class="color-swatch">
+                    <div class="color-circle" style="background-color: #A57F62;"></div>
+                    <div class="color-name">Bronze</div>
+                    <div class="color-hex">#A57F62</div>
+                </div>
+                <div class="color-swatch">
+                    <div class="color-circle" style="background-color: #98D0D3;"></div>
+                    <div class="color-name">Mint</div>
+                    <div class="color-hex">#98D0D3</div>
+                </div>
+                <div class="color-swatch">
+                    <div class="color-circle" style="background-color: #EEE5DC;"></div>
+                    <div class="color-name">Sand</div>
+                    <div class="color-hex">#EEE5DC</div>
+                </div>
+                <div class="color-swatch">
+                    <div class="color-circle" style="background-color: #823755;"></div>
+                    <div class="color-name">Plum</div>
+                    <div class="color-hex">#823755</div>
+                </div>
+                <div class="color-swatch">
+                    <div class="color-circle" style="background-color: #F37045;"></div>
+                    <div class="color-name">Tangerine</div>
+                    <div class="color-hex">#F37045</div>
+                </div>
+            </div>
+        </div>
+
+        <footer>
+            <p>AvenStudio — Building confidence through clarity</p>
+        </footer>
+    </div>
+</body>
+</html>
