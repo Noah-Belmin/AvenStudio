@@ -15,6 +15,12 @@ from modules.tasks.handlers import TasksModule
 from modules.stats.handlers import StatsModule
 from modules.categories.handlers import CategoriesModule
 from modules.automation.handlers import AutomationModule
+from modules.projects.handlers import ProjectsModule
+from modules.budget.handlers import BudgetModule
+from modules.documents.handlers import DocumentsModule
+from modules.contacts.handlers import ContactsModule
+from modules.milestones.handlers import MilestonesModule
+from modules.materials.handlers import MaterialsModule
 
 
 class Orchestrator:
@@ -45,6 +51,7 @@ class Orchestrator:
         """Discover and register all modules"""
         print("📦 Registering modules...")
 
+        # Core modules
         self.modules['tasks'] = TasksModule()
         print("  ✓ Tasks module")
 
@@ -56,6 +63,25 @@ class Orchestrator:
 
         self.modules['automation'] = AutomationModule()
         print("  ✓ Automation module")
+
+        # Project management modules
+        self.modules['projects'] = ProjectsModule()
+        print("  ✓ Projects module")
+
+        self.modules['budget'] = BudgetModule()
+        print("  ✓ Budget module")
+
+        self.modules['documents'] = DocumentsModule()
+        print("  ✓ Documents module")
+
+        self.modules['contacts'] = ContactsModule()
+        print("  ✓ Contacts module")
+
+        self.modules['milestones'] = MilestonesModule()
+        print("  ✓ Milestones module")
+
+        self.modules['materials'] = MaterialsModule()
+        print("  ✓ Materials module")
 
         print(f"✅ {len(self.modules)} modules registered")
 
