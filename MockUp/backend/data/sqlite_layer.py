@@ -30,15 +30,45 @@ class SQLiteDataLayer:
         """Create tables if they don't exist"""
         cursor = self.conn.cursor()
 
-        # Tasks table
+        # ==================== PROJECTS TABLE ====================
+        # Core table - all other tables link to projects
+        cursor.execute('''
+        CREATE TABLE IF NOT EXISTS projects (
+            id TEXT PRIMARY KEY,
+            name TEXT NOT NULL,
+            location TEXT,
+            project_type TEXT DEFAULT 'self-build' CHECK(project_type IN ('self-build', 'custom-build', 'renovation')),
+            start_date TEXT,
+            target_completion TEXT,
+            status TEXT DEFAULT 'planning' CHECK(status IN ('planning', 'in-progress', 'on-hold', 'completed', 'archived')),
+            budget_total REAL,
+            description TEXT DEFAULT '',
+            created_at TEXT DEFAULT (datetime('now')),
+            updated_at TEXT DEFAULT (datetime('now'))
+        )
+        ''')
+
+        # Create default project if none exists
+        cursor.execute('SELECT COUNT(*) FROM projects')
+        if cursor.fetchone()[0] == 0:
+            cursor.execute('''
+            INSERT INTO projects (id, name, status)
+            VALUES ('default-project', 'My Self-Build Project', 'planning')
+            ''')
+            print("📁 Created default project")
+
+        # ==================== TASKS TABLE ====================
+        # Enhanced with project_id and phase for UK self-build workflow
         cursor.execute('''
         CREATE TABLE IF NOT EXISTS tasks (
             id TEXT PRIMARY KEY,
+            project_id TEXT NOT NULL DEFAULT 'default-project',
             title TEXT NOT NULL,
             description TEXT DEFAULT '',
             status TEXT DEFAULT 'todo' CHECK(status IN ('todo', 'in-progress', 'review', 'blocked', 'done')),
             priority TEXT DEFAULT 'medium' CHECK(priority IN ('low', 'medium', 'high', 'urgent')),
             category TEXT NOT NULL,
+            phase TEXT,
             tags TEXT DEFAULT '[]',
             due_date TEXT,
             start_date TEXT,
@@ -53,11 +83,112 @@ class SQLiteDataLayer:
             subtasks TEXT DEFAULT '[]',
             custom_fields TEXT DEFAULT '{}',
             created_at TEXT DEFAULT (datetime('now')),
-            updated_at TEXT DEFAULT (datetime('now'))
+            updated_at TEXT DEFAULT (datetime('now')),
+            FOREIGN KEY (project_id) REFERENCES projects(id) ON DELETE CASCADE
         )
         ''')
 
-        # Categories table
+        # ==================== BUDGET ITEMS TABLE ====================
+        cursor.execute('''
+        CREATE TABLE IF NOT EXISTS budget_items (
+            id TEXT PRIMARY KEY,
+            project_id TEXT NOT NULL,
+            category TEXT NOT NULL,
+            item_name TEXT NOT NULL,
+            estimated_cost REAL DEFAULT 0,
+            actual_cost REAL DEFAULT 0,
+            supplier TEXT,
+            quote_date TEXT,
+            status TEXT DEFAULT 'estimated' CHECK(status IN ('estimated', 'quoted', 'approved', 'ordered', 'paid')),
+            notes TEXT DEFAULT '',
+            created_at TEXT DEFAULT (datetime('now')),
+            updated_at TEXT DEFAULT (datetime('now')),
+            FOREIGN KEY (project_id) REFERENCES projects(id) ON DELETE CASCADE
+        )
+        ''')
+
+        # ==================== DOCUMENTS TABLE ====================
+        cursor.execute('''
+        CREATE TABLE IF NOT EXISTS documents (
+            id TEXT PRIMARY KEY,
+            project_id TEXT NOT NULL,
+            filename TEXT NOT NULL,
+            file_path TEXT NOT NULL,
+            document_type TEXT DEFAULT 'other' CHECK(document_type IN ('planning', 'building_regs', 'certificate', 'drawing', 'contract', 'invoice', 'photo', 'other')),
+            version INTEGER DEFAULT 1,
+            linked_task_id TEXT,
+            linked_phase TEXT,
+            upload_date TEXT DEFAULT (datetime('now')),
+            tags TEXT DEFAULT '[]',
+            notes TEXT DEFAULT '',
+            created_at TEXT DEFAULT (datetime('now')),
+            updated_at TEXT DEFAULT (datetime('now')),
+            FOREIGN KEY (project_id) REFERENCES projects(id) ON DELETE CASCADE,
+            FOREIGN KEY (linked_task_id) REFERENCES tasks(id) ON DELETE SET NULL
+        )
+        ''')
+
+        # ==================== CONTACTS TABLE ====================
+        cursor.execute('''
+        CREATE TABLE IF NOT EXISTS contacts (
+            id TEXT PRIMARY KEY,
+            project_id TEXT NOT NULL,
+            name TEXT NOT NULL,
+            role TEXT DEFAULT 'other',
+            company TEXT,
+            email TEXT,
+            phone TEXT,
+            address TEXT,
+            notes TEXT DEFAULT '[]',
+            contracts TEXT DEFAULT '[]',
+            performance_rating INTEGER CHECK(performance_rating BETWEEN 1 AND 5),
+            created_at TEXT DEFAULT (datetime('now')),
+            updated_at TEXT DEFAULT (datetime('now')),
+            FOREIGN KEY (project_id) REFERENCES projects(id) ON DELETE CASCADE
+        )
+        ''')
+
+        # ==================== MILESTONES TABLE ====================
+        cursor.execute('''
+        CREATE TABLE IF NOT EXISTS milestones (
+            id TEXT PRIMARY KEY,
+            project_id TEXT NOT NULL,
+            name TEXT NOT NULL,
+            phase TEXT,
+            target_date TEXT,
+            actual_date TEXT,
+            status TEXT DEFAULT 'pending' CHECK(status IN ('pending', 'in-progress', 'completed', 'delayed', 'cancelled')),
+            dependencies TEXT DEFAULT '[]',
+            notes TEXT DEFAULT '',
+            created_at TEXT DEFAULT (datetime('now')),
+            updated_at TEXT DEFAULT (datetime('now')),
+            FOREIGN KEY (project_id) REFERENCES projects(id) ON DELETE CASCADE
+        )
+        ''')
+
+        # ==================== MATERIALS TABLE ====================
+        cursor.execute('''
+        CREATE TABLE IF NOT EXISTS materials (
+            id TEXT PRIMARY KEY,
+            project_id TEXT NOT NULL,
+            item_name TEXT NOT NULL,
+            quantity REAL,
+            unit TEXT DEFAULT 'units',
+            supplier_id TEXT,
+            cost REAL DEFAULT 0,
+            lead_time_days INTEGER DEFAULT 0,
+            delivery_date TEXT,
+            delivery_status TEXT DEFAULT 'not-ordered' CHECK(delivery_status IN ('not-ordered', 'ordered', 'in-transit', 'delivered', 'overdue')),
+            warranty_info TEXT DEFAULT '',
+            notes TEXT DEFAULT '',
+            created_at TEXT DEFAULT (datetime('now')),
+            updated_at TEXT DEFAULT (datetime('now')),
+            FOREIGN KEY (project_id) REFERENCES projects(id) ON DELETE CASCADE,
+            FOREIGN KEY (supplier_id) REFERENCES contacts(id) ON DELETE SET NULL
+        )
+        ''')
+
+        # ==================== CATEGORIES TABLE ====================
         cursor.execute('''
         CREATE TABLE IF NOT EXISTS categories (
             name TEXT PRIMARY KEY,
@@ -65,12 +196,12 @@ class SQLiteDataLayer:
         )
         ''')
 
-        # Insert default categories
-        default_categories = ['work', 'personal', 'health', 'learning', 'construction', 'other']
+        # Insert default categories for UK self-build
+        default_categories = ['planning', 'groundworks', 'structure', 'first-fix', 'second-fix', 'finishes', 'external', 'other']
         for cat in default_categories:
             cursor.execute('INSERT OR IGNORE INTO categories (name) VALUES (?)', (cat,))
 
-        # Automation rules table
+        # ==================== AUTOMATION RULES TABLE ====================
         cursor.execute('''
         CREATE TABLE IF NOT EXISTS automation_rules (
             id TEXT PRIMARY KEY,
@@ -206,7 +337,11 @@ class SQLiteDataLayer:
         deserialized = dict(row)
 
         # Fields that should be parsed as JSON
-        json_fields = ['tags', 'blocked_by', 'comments', 'attachments', 'checklist', 'subtasks', 'custom_fields', 'conditions', 'actions']
+        json_fields = [
+            'tags', 'blocked_by', 'comments', 'attachments', 'checklist',
+            'subtasks', 'custom_fields', 'conditions', 'actions',
+            'notes', 'contracts', 'dependencies'  # New fields from new tables
+        ]
 
         for field in json_fields:
             if field in deserialized and isinstance(deserialized[field], str):
